@@ -1,0 +1,11 @@
+fpmi 2 1 uio poi 1
+fpmi 1 1 uio poi 2
+fpmi 4 1 uio poi 2
+fpmi 4 1 uio pooi 3
+fpmi 2 3 uio poi 4
+fpmi 2 2 uio poi 5
+fpmi 2 2 uio poi 6
+fpmi 2 1 uio poi 7
+fpmi 2 2 uio poi 8
+fpmi 2 4 uio poi 9
+fpmi 2 2 uio poi 10
