@@ -1,0 +1,165 @@
+import java.util.*;
+
+public class Main {
+
+    static final int BEGIN = 10000;
+    static final int END = 100000;
+
+    public static void main(String[] args) {
+        List <Long> primes = PrimesGenerator.getPrimesOfInterval(BEGIN, END);
+        System.out.println(BruteForce.bruteForce(primes)); //ComfortableAnswerSaver{answer=999949999, firstMult=30109, secondMult=33211, counter=34974066}
+        System.out.println(new SomeOptimisation(primes).someOptimisation()); //ComfortableAnswerSaver{answer=999949999, firstMult=33211, secondMult=30109, counter=28134485}
+    }
+}
+
+class ComfortableAnswerSaver{
+
+    long answer;
+    long firstMult;
+    long secondMult;
+    long counter;
+
+    public ComfortableAnswerSaver(long answer, long firstMult, long secondMult, long counter) {
+        this.answer = answer;
+        this.firstMult = firstMult;
+        this.secondMult = secondMult;
+        this.counter = counter;
+    }
+
+    @Override
+    public String toString() {
+        return "ComfortableAnswerSaver{" +
+                "answer=" + answer +
+                ", firstMult=" + firstMult +
+                ", secondMult=" + secondMult +
+                ", counter=" + counter +
+                '}';
+    }
+}
+
+class BruteForce{
+
+    public static ComfortableAnswerSaver bruteForce(List <Long> primes){
+        int counter = 0;
+        long answer = 0L;
+        long first = 0L;
+        long second = 0L;
+        for (int i = 0; i < primes.size(); i++){
+            for (int j = i; j < primes.size(); j++){
+                counter++;
+                long current = primes.get(i)*primes.get(j);
+                if (Palindrom.isPalindrom(current) && current > answer){
+                    answer = current;
+                    first = primes.get(i);
+                    second = primes.get(j);
+                }
+            }
+        }
+        return new ComfortableAnswerSaver(answer, first, second, counter);
+    }
+}
+
+
+//Because of PriorityQueue features it works slower than upper variant, but we have less iterations
+class SomeOptimisation{
+
+    List <Long> primes;
+
+    class NumberAndIndex implements Comparable<NumberAndIndex>{
+        long number;
+        int index;
+        long currentMultiply;
+
+        NumberAndIndex(long number, int index){
+            this.number = number;
+            this.index = index;
+            currentMultiply = number*primes.get(index);
+        }
+
+        boolean next(){
+            if (index-1 > 0){
+                index--;
+                currentMultiply = primes.get(index)*number;
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public int compareTo(NumberAndIndex numberAndIndex) {
+            // I know that better to use difference, but it can be some problems with long numbers
+            if (numberAndIndex.currentMultiply == currentMultiply)
+                return 0;
+            if (numberAndIndex.currentMultiply > currentMultiply)
+                return 1;
+            return -1;
+        }
+
+        @Override
+        public String toString() {
+            return "NumberAndIndex{" +
+                    "number=" + number +
+                    ", index=" + index +
+                    ", currentMultiply=" + currentMultiply +
+                    '}';
+        }
+    }
+
+    public SomeOptimisation(List <Long> primes){
+        this.primes = primes;
+    }
+
+    public ComfortableAnswerSaver someOptimisation(){
+        int count = 0;
+        PriorityQueue<NumberAndIndex> queue = new PriorityQueue<>();
+        for (int i = 1; i < primes.size(); i++){
+            queue.add(new NumberAndIndex(primes.get(i), i-1));
+        }
+        while (!queue.isEmpty()){
+            count++;
+            NumberAndIndex numberAndIndex = queue.poll();
+            if (Palindrom.isPalindrom(numberAndIndex.currentMultiply)) {
+                return new ComfortableAnswerSaver(numberAndIndex.currentMultiply, numberAndIndex.number, primes.get(numberAndIndex.index), count);
+            }
+            if (numberAndIndex.next())
+                queue.add(numberAndIndex);
+        }
+        return null;
+    }
+}
+
+class PrimesGenerator{
+    public static List<Long> getPrimesOfInterval (int begin, int end){
+        List <Long> primes = new ArrayList<>();
+        boolean[] numbers = new boolean[end + 1];
+
+        Arrays.fill(numbers, true);
+        numbers[0] = numbers[1] = false;
+        for (int i = 2; i < numbers.length; ++i) {
+            if (numbers[i]) {
+                for (int j = 2; i * j < numbers.length; ++j) {
+                    if (i*j < 0)
+                        break;
+                    numbers[i * j] = false;
+                }
+            }
+        }
+        for (int i = begin; i < end; i++){
+            if (numbers[i])
+                primes.add((long)i);
+        }
+        return primes;
+    }
+}
+
+class Palindrom{
+    public static boolean isPalindrom(long number){
+        long another = 0;
+        while (number > another){
+            another = another*10 + number%10;
+            number /= 10;
+        }
+        return number == another || number == another/10;
+    }
+}
+
